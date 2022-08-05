@@ -12,7 +12,7 @@ Load and filter all the data required to run the code for estimating the isotopi
 Plot the study area (Figure 1 in the manuscript). Some external data is needed to reproduce the plot (links provided as comments).
 
 ## DisplayTimeSeries_R1.m
-Show timeseries od $$\delta^{18}$$O, d-excess, wind speed, SST and $$h_{s}$$ (Figure 2 in the manuscript).
+Show timeseries od $\delta^{18}$O, d-excess, wind speed, SST and $h_{s}$ (Figure 2 in the manuscript).
 
 ## EstimateErrorOnFluxComposition_V4
 Run this script to calculate the isotopic composition of the evaporation flux and distribution of non-equilibrium fractionation factors (Figure 3 in the manuscript). 
