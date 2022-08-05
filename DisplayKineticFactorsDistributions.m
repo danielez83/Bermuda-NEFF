@@ -13,7 +13,8 @@ D2_D1 = (1 - Di21) * 1000; % [‰]
 
 
 if ~exist('kinetic_18_16_sample_FG', 'var')
-load('../Matlab data/SImulations/SImulationOutputAVG5min_VaporOffset_30032022.mat')    % FIxed Ocean composition, SST from OSTIA, Isotopic data recalibrated using 7.5min averaging window instead of 10.5 (default in HC data)
+load('../Matlab data/SImulations/SImulationOutputAVG5min_VaporOffset_30032022.mat') % Fixed Ocean composition, SST from OSTIA, Isotopic data recalibrated using 5min averaging window instead of 10.5 (default in HC data)
+% load('../Matlabdata/SImulationsSImulationOutputAVG5min_VaporOffset_VaryinSST_18072022.mat') % Same as above but using day-by-day SST difference between OSTIA and St. George (not average offset)
 %load('../Matlab data/BottomTopData_SYNC_HF_5minAVG_1e3_repetitions.mat')    % FIxed Ocean composition, SST from OSTIA, Isotopic data recalibrated using 7.5min averaging window instead of 10.5 (default in HC data)
     disp('Load saved data')
     pause(1)

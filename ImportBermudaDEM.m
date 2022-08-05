@@ -5,11 +5,22 @@
 % Date:        Last revision 11/10/2020
 
 tic
+%% Include functions and script
+if ~contains(string(path), 'Functions')
+    addpath(genpath('Functions')) % Include Functions to search path
+end  
 %% Configuration
 SiteCoordinates = [32.2644427 -64.8941763 29]; % Latitude Longitude Z (m ASL)
 % Variables that do not require timeseries extraction
 %noTSVarNames = {'time', 'latitude', 'longitude'};
 %dt = minutes(30);
+
+%% Custom colormap
+size_cmap = 25;
+rchan = linspace(0.8750, 0, size_cmap);
+gchan = linspace(1, 0, size_cmap);
+bchan = linspace(1, 0.5, size_cmap);
+cmap_blue = [rchan', gchan', bchan'];
 %% Load NetCDF file
 % https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ngdc.mgg.dem:5010/html
 filename = '../../NetCDF data/bermuda_3_msl_2013.nc';
@@ -44,13 +55,14 @@ StGeorgePOS = [32.38, -64.67]; % St.George harbor
 HogReefCOL = 'r';
 CrescentReefCOL = 'g';
 StGeorgeCOL = 'b';
-BATSoceanCOL = [0 0.4471 0.7412];
+BATSoceanCOL = 'y';%;[0 0.4471 0.7412];
 BATSoceanSYM = '^';
 MkrSyze = 16;
 geoshow(HogReefPOS(1), HogReefPOS(2), 'DisplayType', 'point','Marker','o', 'MarkerEdgeColor','k','MarkerFaceColor', HogReefCOL, 'MarkerSize', MkrSyze)
 geoshow(CrescentReefPOS(1), CrescentReefPOS(2), 'DisplayType', 'point','Marker','o', 'MarkerEdgeColor','k','MarkerFaceColor', CrescentReefCOL, 'MarkerSize', MkrSyze)
 geoshow(StGeorgePOS(1), StGeorgePOS(2), 'DisplayType', 'point','Marker','o', 'MarkerEdgeColor','k','MarkerFaceColor',StGeorgeCOL, 'MarkerSize', MkrSyze)
-geoshow(BATSoceanPOS(1), BATSoceanPOS(2), 'DisplayType', 'point','Marker',BATSoceanSYM, 'MarkerEdgeColor','k','MarkerFaceColor',BATSoceanCOL, 'MarkerSize', MkrSyze)
+geoshow(BATSoceanPOS(1), BATSoceanPOS(2), 'DisplayType', 'point','Marker',BATSoceanSYM, 'MarkerEdgeColor','k','MarkerFaceColor',BATSoceanCOL, 'MarkerSize', ...
+    MkrSyze + 2, "LineWidth", 2)
 legend(["OSTIA";"Hog Reef";"Crescent Reef";"St.George Harnour"; "BATS"]);
 
 %% Convert time vector into datetime vector
@@ -59,9 +71,9 @@ Band1corr(Band1corr>=0) = -0.1;
 Band1corr = -1*Band1corr;
 R = georefcells([lat(1) lat(end)], [lon(1) lon(end)], [size(Band1, 2) size(Band1, 1)],'ColumnsStartFrom','south');
 geoshow(Band1corr', R, 'DisplayType', 'texture')
-geoshow(coast, 'FaceColor', [.5 .5 .5])
+geoshow(coast, 'FaceColor', [1 1 1], 'EdgeColor', [0, 0, 0], 'LineWidth', 1.5)
 %colormap(flip(haxby(50)))
-colormap(flip(jet(50)))
+colormap(cmap_blue)
 set(gca,'ColorScale','log')
 colorbar
 

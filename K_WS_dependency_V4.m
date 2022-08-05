@@ -9,8 +9,8 @@ Show_k18_bestfit    = 1; % Display k18 best fit?
 %% Data loade
 tic
 LoadAndFilter
-if Show_no_tres_q_iso == 1
-    load('../Matlab Data/WS_dep_no_q_iso_thresholds.mat')
+if Show_no_tres_q_iso == 0
+    load('../Matlab Data/WS_dep_no_q_iso_thresholds_new.mat')
     %WSbinnerVAls_no_thres = WSbinnerVAls_no_thres(2:end);
     %kinetic_18_16_WS_KP_no_thres = kinetic_18_16_WS_KP_no_thres(2:end);
     %kinetic_2_1_WS_KP_no_thres = kinetic_2_1_WS_KP_no_thres(2:end);
@@ -171,7 +171,26 @@ for j = 1 : length(WSbinner) - 1
     PBLasd(j) =  nanmean(PBLH(indexesOI));
     SSTasd(j) =  nanmean(SST(indexesOI));
     RHSSTasd(j) =  nanmean(RHSSTtop(indexesOI));
+    % Compute mean wind direction on u and v components (WS should be not
+    % necessary here but kept for consistency)
+    V_east = nanmean(WS(indexesOI) .* sin(WD(indexesOI) * pi/180));
+    V_north = nanmean(WS(indexesOI) .* cos(WD(indexesOI) * pi/180));
+    % Convert u and v components to vector (in degrees)
+    WDasd(j) = atan2(V_east, V_north) * 180/pi;
+    WDasd(j) = (360 + WDasd(j)); % Remap to 0 - 360
+    if Show_no_tres_q_iso == 1
+        indexesOI =  WS_no_thres>=WSbinner(j) & WS_no_thres<WSbinner(j+1);
+        nVAls_no_thres(j) = sum(indexesOI);
+        % Compute mean wind direction on u and v components (WS should be not
+        % necessary here but kept for consistency)
+        V_east = nanmean(WS_no_thres(indexesOI) .* sin(WD_no_thres(indexesOI) * pi/180));
+        V_north = nanmean(WS_no_thres(indexesOI) .* cos(WD_no_thres(indexesOI) * pi/180));
+        % Convert u and v components to vector (in degrees)
+        WDasd_no_thres(j) = atan2(V_east, V_north) * 180/pi;
+        WDasd_no_thres(j) = (360 + WDasd_no_thres(j)); % Remap to 0 - 360
+    end
 end
+
 %% Plot estimated k-2
 if Show_k2 == 1
     clf
@@ -206,7 +225,7 @@ if Show_k2 == 1
     hold on
     % Plot linear model
     fitMDL = fitlm(WSbinnerVAls(1:21), kinetic_2_1_WS_KP(1:21));  % range 0 - 10 m/s
-    plot(WSbinnerVAls, feval(fitMDL, WSbinnerVAls), 'LineWidth', 1.5, 'LineStyle', '-', 'Color', [0 0 0])
+    plot(WSbinnerVAls(1:21), feval(fitMDL, WSbinnerVAls(1:21)), 'LineWidth', 1.5, 'LineStyle', '-', 'Color', [0 0 0])
     [rho, pval] = corr(WSbinnerVAls(2:21)', kinetic_2_1_WS_KP(2:21)');
     fprintf('In wind speed range 0.5 10 m/s, correlation betwen k2 and WS is %.5f, p-value is %.5f\n', rho, pval)
 
@@ -307,7 +326,7 @@ fprintf('Slope of fit:          %.2f ± %.2f\n', slope(1), slope(2))
 fprintf('Intercept of fit:      %.2f ± %.2f\n', intercept(1), intercept(2))
 fprintf('Rsquared of fit:       %.2f\n', Rsq) 
 if Show_k18_bestfit == 1
-    fit_plot = plot(WSbinnerVAls, feval(fitMDL, WSbinnerVAls), 'LineWidth', 1.5, 'LineStyle', '-', 'Color', [0 0 0]);
+    fit_plot = plot(WSbinnerVAls(1:21), feval(fitMDL, WSbinnerVAls(1:21)), 'LineWidth', 1.5, 'LineStyle', '-', 'Color', [0 0 0]);
     fit_plot.DisplayName = 'Linear fit (1 - 10 m s^{-1})';
 end
 
@@ -421,6 +440,10 @@ if Show_no_tres_q_iso == 1
     %h3.FaceAlpha = .3;
     h3.EdgeColor = [1, 0, 0];
     h3.Annotation.LegendInformation.IconDisplayStyle = 'off';
+    for j = 1:length(WSbinnerVAls_no_thres)
+        text(WSbinnerVAls_no_thres(j), nVAls_no_thres(j) + 10,'\uparrow','FontSize',18,'Rotation',-WDasd_no_thres(j), 'HorizontalAlignment','center', 'FontWeight', 'bold', 'color', [0.8 0.8 0.8]);
+    end
+
 end
 
 h = bar(WSbinnerVAls, nVAls');
@@ -434,10 +457,16 @@ h4.FaceColor = [1 0 0];
 h4.EdgeColor = [1, 0, 0];
 h4.Annotation.LegendInformation.IconDisplayStyle = 'off';
 
+for j = 1:length(WSbinnerVAls)
+    if ~isnan(WDasd(j))
+        text(WSbinnerVAls(j), nVAls(j) + 10,'\uparrow','FontSize',18,'Rotation',-WDasd(j), 'HorizontalAlignment','center', 'FontWeight', 'bold', 'color', [0 0 0]);
+    end
+end
+
 
 grid('on')
 xlim([0 12.5])
-%ylim([0,150]);
+%ylim([0,170]);
 ax = gca;
 ax.XLabel.FontSize = 12;
 ax.XAxis.FontSize = 12;
@@ -459,4 +488,19 @@ legend
 %% Utils
 k_smooth_LOWER(find(SimWS_LOWER==6))
 k_rough_UPPER(find(SimWS_UPPER==6.1))
+%% DIfference between rough parametrization and observed (below 10 m/s)
+mean_rough_obs = mean(kinetic_18_16_WS_KP(WSbinnerVAls > 7 & WSbinnerVAls < 10));
+mean_rough_param = mean(k_rough_UPPER(SimWS_UPPER > 7 & SimWS_UPPER < 10));
+perc_diff = 100*(mean_rough_param)/mean_rough_obs;
+fprintf('Mean k observed between 7 and 10 m/s is %.2f\n', mean_rough_obs)
+fprintf('Mean k parametrized between 7 and 10 m/s is %.2f\n', mean_rough_param)
+fprintf('Difference is: %.2f\n', perc_diff)
+
+%% Mean k18 vals
+fprintf('Simple mean k18 of binned observations = %.2f\n', nanmean(kinetic_18_16_WS_KP))
+one_over_error = 1./SE_kinetic_18_16_WS_KP;
+my_mask = ~isinf(one_over_error)&~isnan(one_over_error);
+avg = sum(kinetic_18_16_WS_KP(my_mask).*one_over_error(my_mask))/sum(one_over_error(my_mask));
+fprintf('Mean of k18 observations weighted by standard errors = %.2f\n', avg)
+fprintf('Mean of k18 estimation without any weigthing = %.2f\n', nanmean(BK18_KP_copy))
 

@@ -9,7 +9,7 @@ nIterations             = 1e2;     % Repetition for bootstrapping
 rng('default');                    % Set default random  number generator to default seed (0), required to reproduce results
 s                       = rng;
 
-% Plot regression lines?
+% Plot regression lines for each day?
 PlotRegressions         = 0;
 
 % Show Flux Gradient in addition to Keeling Plot results?
@@ -17,7 +17,6 @@ ShowFG                  = 0;
 
 % Load and filter data
 LoadAndFilter
-%TopdD = TopdD - 2;
 
 %% Subset data day by day
 % this way you will have more than two points to fit a line and you can
@@ -43,6 +42,14 @@ sigmaET_delta_KP            = KPValues;
 % Observations subset
 TopVals_Averages            = NaN(length(DayOfInterest), 3);
 TopVals_STDs                = NaN(length(DayOfInterest), 3);
+WSs                         = NaN(length(DayOfInterest), 3);
+SSTs                        = NaN(length(DayOfInterest), 1);
+SSTdifferences              = NaN(length(DayOfInterest), 1);
+PBLHs                       = NaN(length(DayOfInterest), 1);
+RHSSTs                      = NaN(length(DayOfInterest), 1);
+TopVals_dexcess             = NaN(length(DayOfInterest), 1);
+Ns                          = NaN(length(DayOfInterest), 1);
+
 
 % kinetic fractionation values
 MinkVal                 = -60;
@@ -53,8 +60,10 @@ kVals = (MinkVal:0.01:MaxkVal)';
 RegresssionStatsTable = table(DayOfInterest, nan(length(DayOfInterest),1), nan(length(DayOfInterest),1),  nan(length(DayOfInterest),1),  nan(length(DayOfInterest),1),  nan(length(DayOfInterest),1), ...
                       'VariableNames', ["Date","NumObservations", "FGd18O","FGdD", "KPd18O", "KPdD"]);
 
-%% Dataset is small, uncertainty cannot be approximated with eq. 25 in Good
-% et 2012
+%% Dataset is small, uncertainty cannot be approximated with eq. 25 in Good et 2012
+%load('../Matlab data/SST_SYNC_OSTIA1x1deg.mat')
+%local_SST_mean = nanmean(horzcat(SST_SYNC.SST_Crescent(GoodIndexes), SST_SYNC.SST_HOG(GoodIndexes), SST_SYNC.SST_StGeorge(GoodIndexes)), 2);
+
 for j = 1 : length(DayOfInterest)
     GoodOBS = month(ObsDates) == month(DayOfInterest(j)) & day(ObsDates) == day(DayOfInterest(j));
     if sum(GoodOBS) > 2
@@ -67,8 +76,18 @@ for j = 1 : length(DayOfInterest)
         TopVals_STDs(j, :)      = std(TopVals_deltas);
         % wind speed
         WSs(j,1)                = mean(WS(GoodOBS));
+        % SSTs
+        SSTs(j,1)                = mean(SST(GoodOBS));
+        
+        %SSTdifferences      
+        %SSTdifferences(j,1)     = mean(SST(GoodOBS) - local_SST_mean(GoodOBS)-273.15);
+        
         % BLH
-        PBLHs(j,1)                = mean(PBLH(GoodOBS));
+        PBLHs(j,1)              = mean(PBLH(GoodOBS));
+        % BLH
+        RHSSTs(j,1)             = mean(RHSST(GoodOBS));
+        % Number of obervations for fitting FG and KP
+        Ns(j, 1)                = sum(GoodOBS);
         % Ocean Isotopic composition
         if UseConstantOceanDelta == 0
             SeaWater_d18O = mean(SeaWater_d18O_COPY(GoodOBS));
@@ -195,6 +214,8 @@ for j = 1 : length(DayOfInterest)
         % Save regression R
         RegresssionStatsTable.KPdD(j) = mdl.Rsquared.Adjusted;        
         if PlotRegressions
+            fprintf('Iteration #%d, ', j)
+            fprintf('%s (N = %d)\n', DayOfInterest(j), 2*Ns(j))
             subplot(2,2,4)
             plot(mdl)
             title(sprintf('KP dD_E for %s', DayOfInterest(j)))

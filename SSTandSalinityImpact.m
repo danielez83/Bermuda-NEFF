@@ -1,8 +1,11 @@
-%%
+%% Load and filter data
 LoadAndFilter
-
-load('../Matlab data/SST_SYNC_OSTIA1x1deg.mat')
-load('../Matlab data/Salinity_SYNC.mat')
+% load additional data for plot of temperature difference among stations
+data_folder             = '../GIT Data/';
+NOAA_BATS_SYNC          = readtable(strcat(data_folder, 'NOAA_BATS_SYNC.txt'));
+%StGeorge_SYNC           = readtable(strcat(data_folder, 'StGeorge.txt'));
+%load('../Matlab data/SST_SYNC_OSTIA1x1deg.mat')
+%load('../Matlab data/Salinity_SYNC.mat')
 
 %% Colors and symbols
 HogReefCOL = 'r';
@@ -13,14 +16,14 @@ BATSoceanSYM = '^';
 MkrSyze = 16;
 
 %% Make data subset
-SST_OSTIA           = SST_SYNC.SST_OSTIA(GoodIndexes);
-SST_Cresceng        = SST_SYNC.SST_Crescent(GoodIndexes);
-SST_Hog             = SST_SYNC.SST_HOG(GoodIndexes);
-SST_StGeorge        = SST_SYNC.SST_StGeorge(GoodIndexes);
+SST_OSTIA           = MeteoDataSYNC.SST(GoodIndexes);
+SST_Cresceng        = NOAA_BATS_SYNC.SST_Crescent(GoodIndexes);
+SST_Hog             = NOAA_BATS_SYNC.SST_HOG(GoodIndexes);
+SST_StGeorge        = NOAA_BATS_SYNC.SST_StGeorge(GoodIndexes);
 
-Salinity_BATS       = Sal_DataSYNC.goodSALBATS(GoodIndexes);
-Salinity_Cresceng   = Sal_DataSYNC.goodSALCrescent(GoodIndexes);
-Salinity_Hog        = Sal_DataSYNC.goodSALHOG(GoodIndexes);
+Salinity_BATS       = NOAA_BATS_SYNC.SAL_BATS(GoodIndexes);
+Salinity_Cresceng   = NOAA_BATS_SYNC.SAL_Crescent(GoodIndexes);
+Salinity_Hog        = NOAA_BATS_SYNC.SAL_HOG(GoodIndexes);
 
 %% Salinity to isotopic ratio conversion function
 % Sal2d18O    = @(sal) 0.39*sal-13.1; % From BATS s-delta relationship
@@ -31,6 +34,7 @@ Sal2dD      = @(sal) 2.04*sal-65.8; % From Benetti et al. (2017) s-delta relatio
 % Sal2dD      = @(sal) 2.139*sal-69.539; % From Benetti et al. (2017) + BATS 2012 data  s-delta relationship, see OceanIsotopicCompostion.xlsx Tab Benetti et al 2017
 
 %% Tempearure for d18O and dD, deviation from OSTIA
+figure(1)
 x_values_deltas = -2:.01:+2;
 % histogram(d18_V(SeaWater_d18O, SST_Hog + 273.15) - d18_V(SeaWater_d18O, SST_OSTIA + 273.15), 'Normalization', 'pdf' )
 % histogram(d2_V(SeaWater_dD, SST_Hog + 273.15) - d2_V(SeaWater_dD, SST_OSTIA + 273.15), 'Normalization', 'pdf' )
@@ -93,6 +97,7 @@ fprintf('Mean deviation using St.George instead of OSTIA is d18O = %.2f‰, dD =
         mean(d18_V(SeaWater_d18O, SST_StGeorge + 273.15) - d18_V(SeaWater_d18O, SST_OSTIA + 273.15)), ...
         mean(d2_V(SeaWater_dD, SST_StGeorge + 273.15) - d2_V(SeaWater_dD, SST_OSTIA + 273.15)));        
 %% Salinity for d18O and dD
+figure(2)
 x_values_deltas = -2:.01:+2;
 % histogram(Sal2d18O(Salinity_Hog) - Sal2d18O(Salinity_BATS), 'Normalization', 'pdf' )
 pd = fitdist(Sal2d18O(Salinity_Hog) - Sal2d18O(Salinity_BATS),'Kernel', 'Kernel','normal', 'Bandwidth', .05 );
