@@ -1,6 +1,6 @@
 % Author:      Daniele Zannoni
 % Name:        ImportBermudaDEM.m
-% Description: Import Bermuda coastal DEM
+% Description: Import Bermuda coastal DEM and display study area
 %              
 % Date:        Last revision 11/10/2020
 
@@ -23,7 +23,7 @@ bchan = linspace(1, 0.5, size_cmap);
 cmap_blue = [rchan', gchan', bchan'];
 %% Load NetCDF file
 % https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ngdc.mgg.dem:5010/html
-filename = '../../NetCDF data/bermuda_3_msl_2013.nc';
+filename = '../../../NetCDF data/bermuda_3_msl_2013.nc';
 finfo = ncinfo(filename);
 
 % Get variable name info
@@ -42,9 +42,8 @@ BoxCoordinates = [31.6 32.6; -65.5 -64.1]; % Latitude limits; Longitude limits
 h = worldmap(BoxCoordinates(1,:) ,BoxCoordinates(2,:));
 % Change colors
 p = findobj(h,'type','patch'); % Find background
-%set(p,'FaceColor',[0.0745 0.6235 1.0000]); % Change background to white
-
-coast = shaperead('../../BermudaIsland/nw036zp7611.shp','UseGeoCoords',true);%,'RecordNumbers',2);
+%https://maps.princeton.edu/catalog/stanford-nw036zp7611
+coast = shaperead('../../../BermudaIsland/nw036zp7611.shp','UseGeoCoords',true);%,'RecordNumbers',2);
 
 
 %% Plot points

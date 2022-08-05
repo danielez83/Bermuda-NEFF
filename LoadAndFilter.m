@@ -2,7 +2,7 @@
 % Name:        LoadAndFilterData.m
 % Description: This script load all the required data to run the other
 %              scripts.
-% Date:        Last revision 01/08/2022
+% Date:        Last revision 05/08/2022
 
 %% Include functions and script
 if ~contains(string(path), 'Functions')
@@ -10,7 +10,7 @@ if ~contains(string(path), 'Functions')
 end
 
 %% Where the data is located?
-data_folder             = '../TXT Data/';
+data_folder             = '../../TXT Data/';
 
 %% Filter Configuration (activate/deactivate filters)
 ShowFilterImpact        = 1; % 1 ON, 0 OFF
@@ -131,7 +131,7 @@ MeteoDataSYNC           = readtable(strcat(data_folder, 'MeteoDataSYNC.txt'));
 
 % Change SST value from local to OSTIA
 if UseOSTIASST == 0    
-    data_folder             = '../GIT Data/';
+    data_folder             = '../../GIT Data/';
     NOAA_BATS_SYNC          = readtable(strcat(data_folder, 'NOAA_BATS_SYNC.txt'));
     MeteoDataSYNC.SST = nanmean(horzcat(NOAA_BATS_SYNC.SST_Crescent, NOAA_BATS_SYNC.SST_HOG, NOAA_BATS_SYNC.SST_StGeorge), 2);
     disp('SST from the reef!');
