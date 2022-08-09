@@ -1,6 +1,7 @@
 # Bermuda-NEFF
 The code can be used to reproduce the results in Zannoni et al. (2022), currently under review at Journal of Geophysical Research: Atmospheres.
 A preprint of the manuscript is available here: https://doi.org/10.1002/essoar.10511947.1
+Relase of code v1.0 DOI: 10.5281/zenodo.6977090
 
 
 Description the Matlab scripts.
